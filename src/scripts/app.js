@@ -53,15 +53,90 @@ function setup() {
   ship.scale.set(0.6, 0.6);
 
   //Start position of ship
-  const shipPositionX = app.stage.width / 2 - ship.width / 2,
-    shipPositionY = app.stage.height - ship.height;
-
-  ship.position.set(shipPositionX, shipPositionY);
+  ship.x = app.stage.width / 2 - ship.width / 2;
+  ship.y = app.stage.height - ship.height;
   ship.vx = 0;
   ship.vy = 0;
+
+  //Capture the keyboard arrow keys
+  let left = keyboard(37),
+    // up = keyboard(38),
+    right = keyboard(39);
+  // down = keyboard(40);
+
+  //Left  
+  left.press = () => {
+    ship.vx = -5;
+    ship.vy = 0;
+  };
+  left.release = () => {
+    if (!right.isDown && ship.vy === 0) {
+      ship.vx = 0;
+    }
+  };
+
+  //Right
+  right.press = () => {
+    ship.vx = 5;
+    ship.vy = 0;
+  };
+  right.release = () => {
+    if (!left.isDown && ship.vy === 0) {
+      ship.vx = 0;
+    }
+  };
 
   //Set the game state
   state = play;
 
+  app.ticker.add(delta => gameLoop(delta));
+}
 
+function gameLoop(delta) {
+  //update the current game state:
+  state(delta);
+}
+
+function play(delta) {
+  ship.x += ship.vx;
+  ship.y += ship.vy;
+}
+
+// The 'keyboard' helper function
+function keyboard(keyCode) {
+  let key = {};
+  key.code = keyCode;
+  key.isDown = false;
+  key.isUp = true;
+  key.press = undefined;
+  key.release = undefined;
+
+  //The `downHandler`
+  key.downHandler = event => {
+    if (event.keyCode === key.code) {
+      if (key.isUp && key.press) key.press();
+      key.isDown = true;
+      key.isUp = false;
+    }
+    event.preventDefault();
+  };
+
+  //The `upHandler`
+  key.upHandler = event => {
+    if (event.keyCode === key.code) {
+      if (key.isDown && key.release) key.release();
+      key.isDown = false;
+      key.isUp = true;
+    }
+    event.preventDefault();
+  };
+
+  //Attach event listeners
+  window.addEventListener(
+    "keydown", key.downHandler.bind(key), false
+  );
+  window.addEventListener(
+    "keyup", key.upHandler.bind(key), false
+  );
+  return key;
 }
