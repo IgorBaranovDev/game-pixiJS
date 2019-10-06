@@ -1,0 +1,44 @@
+{"frames": {
+
+"ship-destroed.png":
+{
+	"frame": {"x":0,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"ship-fly.png":
+{
+	"frame": {"x":100,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"ship.png":
+{
+	"frame": {"x":200,"y":0,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"Space.png":
+{
+	"frame": {"x":300,"y":0,"w":700,"h":600},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":700,"h":600},
+	"sourceSize": {"w":700,"h":600}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "sprite-Data.png",
+	"format": "RGBA8888",
+	"size": {"w":1000,"h":600},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:2b5b8e69f4c66713a6f00c407fc277a2:03ec4e6d30b283b5b8c370cd4c58c421:d1acd1225a27aecb1d63ad951425d651$"
+}
+}

@@ -2,12 +2,13 @@
 let Application = PIXI.Application,
   loader = PIXI.loader,
   resources = PIXI.loader.resources,
-  Sprite = PIXI.Sprite;
+  Sprite = PIXI.Sprite,
+  TextureCache = PIXI.utils.TextureCache;
 
 //Create a Pixi Application
 let app = new Application({
-  width: 768,
-  height: 550,
+  width: 700,
+  height: 600,
   antialiasing: false,
   transparent: false,
   resolution: 1
@@ -19,16 +20,12 @@ document.body.appendChild(app.view);
 
 //To change the background color
 app.renderer.backgroundColor = 0x061639;
-
-//If you want to make the canvas fill the entire window, you can apply this
 //CSS styling:
 app.renderer.view.style.display = 'block';
-app.renderer.view.style.margin = '20px auto';
+app.renderer.view.style.margin = '10px auto';
 
-
-//load an image and run the `setup` function when it's done
 loader
-  .add('src/img/spriteData.json')
+  .add('src/img/sprite-Data.json')
   .on('progress', loadProgressHandler)
   .load(setup);
 
@@ -37,18 +34,34 @@ function loadProgressHandler(loader, resource) {
   console.log(`progress: ${Math.round(loader.progress)}%`);
 }
 
-let ship, alien;
+let space, ship, state;
 
 //This `setup` function will run when the image has loaded
 function setup() {
+
+  let spaceTexture = TextureCache['Space.png'];
+  space = new Sprite(spaceTexture);
+  app.stage.addChild(space);
+
+  //create the ship sprite
   ship = new Sprite(
-    resources['src/img/spriteData.json'].textures['ship.png']
+    resources['src/img/sprite-Data.json'].textures['ship.png']
   );
+
   app.stage.addChild(ship);
   //ship scale
   ship.scale.set(0.6, 0.6);
 
   //Start position of ship
-  const bottomPositionOfShip = 550 - ship.height;
-  ship.position.set(354, bottomPositionOfShip);
+  const shipPositionX = app.stage.width / 2 - ship.width / 2,
+    shipPositionY = app.stage.height - ship.height;
+
+  ship.position.set(shipPositionX, shipPositionY);
+  ship.vx = 0;
+  ship.vy = 0;
+
+  //Set the game state
+  state = play;
+
+
 }
