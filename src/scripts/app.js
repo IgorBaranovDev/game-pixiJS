@@ -1,5 +1,6 @@
 //Aliases
 let Application = PIXI.Application,
+  Container = PIXI.Container,
   loader = PIXI.loader,
   resources = PIXI.loader.resources,
   Sprite = PIXI.Sprite,
@@ -36,7 +37,6 @@ function loadProgressHandler(loader, resource) {
 
 let space, ship, state;
 
-//This `setup` function will run when the image has loaded
 function setup() {
 
   let spaceTexture = TextureCache['Space.png'];
@@ -60,9 +60,9 @@ function setup() {
 
   //Capture the keyboard arrow keys
   let left = keyboard(37),
-    // up = keyboard(38),
-    right = keyboard(39);
-  // down = keyboard(40);
+    up = keyboard(38),
+    right = keyboard(39),
+    down = keyboard(40);
 
   //Left  
   left.press = () => {
@@ -72,6 +72,17 @@ function setup() {
   left.release = () => {
     if (!right.isDown && ship.vy === 0) {
       ship.vx = 0;
+    }
+  };
+
+  //Up
+  up.press = () => {
+    ship.vy = -5;
+    ship.vx = 0;
+  };
+  up.release = function () {
+    if (!down.isDown && ship.vx === 0) {
+      ship.vy = 0;
     }
   };
 
@@ -86,9 +97,19 @@ function setup() {
     }
   };
 
+  //Down
+  down.press = () => {
+    ship.vy = 5;
+    ship.vx = 0;
+  };
+  down.release = () => {
+    if (!up.isDown && ship.vx === 0) {
+      ship.vy = 0;
+    }
+  };
+
   //Set the game state
   state = play;
-
   app.ticker.add(delta => gameLoop(delta));
 }
 
@@ -97,11 +118,47 @@ function gameLoop(delta) {
   state(delta);
 }
 
-function play(delta) {
+function play() {
   ship.x += ship.vx;
   ship.y += ship.vy;
+
+  //Contain the ship inside the area of the space
+  contain(ship, { x: 0, y: 400, width: 700, height: 600 });
+  //contain(ship, stage);
 }
 
+/* Helper functions */
+
+function contain(sprite, container) {
+  let collision = undefined;
+
+  //Left
+  if (sprite.x < container.x) {
+    sprite.x = container.x;
+    collision = 'left';
+  }
+
+  //Top
+  if (sprite.y < container.y) {
+    sprite.y = container.y;
+    collision = "top";
+  }
+
+  //Right
+  if (sprite.x + sprite.width > container.width) {
+    sprite.x = container.width - sprite.width;
+    collision = "right";
+  }
+
+  //Bottom
+  if (sprite.y + sprite.height > container.height) {
+    sprite.y = container.height - sprite.height;
+    collision = "bottom";
+  }
+
+  //Return the `collision` value
+  return collision;
+}
 // The 'keyboard' helper function
 function keyboard(keyCode) {
   let key = {};
