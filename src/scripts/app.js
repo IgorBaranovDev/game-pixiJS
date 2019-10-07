@@ -35,7 +35,7 @@ function loadProgressHandler(loader, resource) {
   console.log(`progress: ${Math.round(loader.progress)}%`);
 }
 
-let space, ship, state;
+let space, ship, state, bulet;
 
 function setup() {
 
@@ -58,11 +58,17 @@ function setup() {
   ship.vx = 0;
   ship.vy = 0;
 
+  //Create the bulet sprite
+  bulet = new Sprite(
+    resources['src/img/sprite-Data.json'].textures['bulet.png']
+  );
+
   //Capture the keyboard arrow keys
   let left = keyboard(37),
     up = keyboard(38),
     right = keyboard(39),
-    down = keyboard(40);
+    down = keyboard(40),
+    short = keyboard(32);
 
   //Left  
   left.press = () => {
@@ -80,7 +86,7 @@ function setup() {
     ship.vy = -5;
     ship.vx = 0;
   };
-  up.release = function () {
+  up.release = () => {
     if (!down.isDown && ship.vx === 0) {
       ship.vy = 0;
     }
@@ -108,6 +114,20 @@ function setup() {
     }
   };
 
+  //Short
+  short.press = () => {
+    app.stage.addChild(bulet);
+    bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
+    bulet.y = ship.y - bulet.height;
+    bulet.vx = 0;
+    bulet.vy = -20;
+  };
+  short.release = () => {
+    if (!up.isDown && ship.vx === 0) {
+      ship.vy = 0;
+    }
+  };
+
   //Set the game state
   state = play;
   app.ticker.add(delta => gameLoop(delta));
@@ -121,6 +141,7 @@ function gameLoop(delta) {
 function play() {
   ship.x += ship.vx;
   ship.y += ship.vy;
+  bulet.y += bulet.vy;
 
   //Contain the ship inside the area of the space
   contain(ship, { x: 0, y: 400, width: 700, height: 600 });
@@ -159,6 +180,7 @@ function contain(sprite, container) {
   //Return the `collision` value
   return collision;
 }
+
 // The 'keyboard' helper function
 function keyboard(keyCode) {
   let key = {};
