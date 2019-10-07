@@ -116,11 +116,15 @@ function setup() {
 
   //Short
   short.press = () => {
-    app.stage.addChild(bulet);
-    bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
-    bulet.y = ship.y - bulet.height;
-    bulet.vx = 0;
-    bulet.vy = -20;
+    if (app.stage.children[2]) {
+      console.log('ops..');
+    } else {
+      app.stage.addChild(bulet);
+      bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
+      bulet.y = ship.y - bulet.height;
+      bulet.vx = 0;
+      bulet.vy = -30;
+    }
   };
   short.release = () => {
     if (!up.isDown && ship.vx === 0) {
@@ -145,6 +149,10 @@ function play() {
 
   //Contain the ship inside the area of the space
   contain(ship, { x: 0, y: 400, width: 700, height: 600 });
+  contain(bulet, { y: 0, height: 600 });
+  if (bulet.y === 0) {
+    app.stage.removeChild(bulet);
+  }
   //contain(ship, stage);
 }
 
