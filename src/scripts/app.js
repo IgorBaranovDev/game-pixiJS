@@ -3,6 +3,7 @@ let Application = PIXI.Application,
   Container = PIXI.Container,
   loader = PIXI.loader,
   resources = PIXI.loader.resources,
+  Graphics = PIXI.Graphics,
   Sprite = PIXI.Sprite,
   TextureCache = PIXI.utils.TextureCache;
 
@@ -35,7 +36,7 @@ function loadProgressHandler(loader, resource) {
   console.log(`progress: ${Math.round(loader.progress)}%`);
 }
 
-let space, ship, state, bulet, alien;
+let space, ship, state, bulet, alien, menu, healthBar;
 
 function setup() {
 
@@ -181,6 +182,38 @@ function setup() {
 
     gameScene.addChild(alien);
   }
+
+  // Create info game
+  menu = new Container();
+  menu.position.set(0, 0);
+  gameScene.addChild(menu);
+
+  // Create the background menu
+  let innerMenu = new Graphics();
+  innerMenu.beginFill(0x0e3846);
+  innerMenu.drawRect(0, 0, 700, 40);
+  innerMenu.endFill();
+  menu.addChild(innerMenu);
+
+  //Create the health bar
+  healthBar = new Container();
+  healthBar.position.set(app.stage.width - 220, 15)
+  gameScene.addChild(healthBar);
+
+  //Create the background helth-line
+  let innerBar = new Graphics();
+  innerBar.beginFill(0xfafaff);
+  innerBar.drawRect(0, 0, 200, 10);
+  innerBar.endFill();
+  healthBar.addChild(innerBar);
+
+  //Create the front red helth-line
+  let outerBar = new Graphics();
+  outerBar.beginFill(0xFF3300);
+  outerBar.drawRect(1, 1, 198, 8);
+  outerBar.endFill();
+  healthBar.addChild(outerBar);
+
 
   // Set the game state
   state = play;
