@@ -1,4 +1,4 @@
-//Aliases
+// Aliases
 let Application = PIXI.Application,
   Container = PIXI.Container,
   loader = PIXI.loader,
@@ -6,7 +6,7 @@ let Application = PIXI.Application,
   Sprite = PIXI.Sprite,
   TextureCache = PIXI.utils.TextureCache;
 
-//Create a Pixi Application
+// Create a Pixi Application
 let app = new Application({
   width: 700,
   height: 600,
@@ -19,9 +19,9 @@ let app = new Application({
 //Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
 
-//To change the background color
+// To change the background color
 app.renderer.backgroundColor = 0x061639;
-//CSS styling:
+// CSS styling:
 app.renderer.view.style.display = 'block';
 app.renderer.view.style.margin = '10px auto';
 
@@ -35,42 +35,42 @@ function loadProgressHandler(loader, resource) {
   console.log(`progress: ${Math.round(loader.progress)}%`);
 }
 
-let space, ship, state, bulet;
+let space, ship, state, bulet, alien;
 
 function setup() {
 
-  let spaceTexture = TextureCache['Space.png'];
-  space = new Sprite(spaceTexture);
-  app.stage.addChild(space);
+  //Make the game scene and add it to the stage
+  gameScene = new Container();
+  app.stage.addChild(gameScene);
 
-  //create the ship sprite
+  // create the space 
+  const spaceTexture = TextureCache['Space.png'];
+  space = new Sprite(spaceTexture);
+  gameScene.addChild(space);
+
+  // create the ship sprite
   ship = new Sprite(
     resources['src/img/sprite-Data.json'].textures['ship.png']
   );
 
-  app.stage.addChild(ship);
-  //ship scale
+  gameScene.addChild(ship);
+  // ship scale
   ship.scale.set(0.6, 0.6);
 
-  //Start position of ship
-  ship.x = app.stage.width / 2 - ship.width / 2;
-  ship.y = app.stage.height - ship.height;
+  // start position of ship
+  ship.x = gameScene.width / 2 - ship.width / 2;
+  ship.y = gameScene.height - ship.height;
   ship.vx = 0;
   ship.vy = 0;
 
-  //Create the bulet sprite
-  bulet = new Sprite(
-    resources['src/img/sprite-Data.json'].textures['bulet.png']
-  );
-
-  //Capture the keyboard arrow keys
+  // capture the keyboard arrow keys
   let left = keyboard(37),
     up = keyboard(38),
     right = keyboard(39),
     down = keyboard(40),
     short = keyboard(32);
 
-  //Left  
+  // move ship on left  
   left.press = () => {
     ship.vx = -5;
     ship.vy = 0;
@@ -81,7 +81,7 @@ function setup() {
     }
   };
 
-  //Up
+  //  move ship on up
   up.press = () => {
     ship.vy = -5;
     ship.vx = 0;
@@ -92,7 +92,7 @@ function setup() {
     }
   };
 
-  //Right
+  //  move ship on right
   right.press = () => {
     ship.vx = 5;
     ship.vy = 0;
@@ -103,7 +103,7 @@ function setup() {
     }
   };
 
-  //Down
+  //  move ship on down
   down.press = () => {
     ship.vy = 5;
     ship.vx = 0;
@@ -114,25 +114,75 @@ function setup() {
     }
   };
 
-  //Short
+  // Short
+
+  // create the bulet sprite 
+  bulet = new Sprite(
+    resources['src/img/sprite-Data.json'].textures['bulet.png']
+  );
+
   short.press = () => {
-    if (app.stage.children[2]) {
-      console.log('ops..');
-    } else {
-      app.stage.addChild(bulet);
-      bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
-      bulet.y = ship.y - bulet.height;
-      bulet.vx = 0;
-      bulet.vy = -30;
-    }
+    gameScene.addChild(bulet);
+    console.log('short');
+    bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
+    bulet.y = ship.y - bulet.height;
+    bulet.vx = 0;
+    bulet.vy = -20;
   };
   short.release = () => {
-    if (!up.isDown && ship.vx === 0) {
-      ship.vy = 0;
+    if (!up.isDown && bulet.vx === 0) {
+      fier = true;
     }
   };
 
-  //Set the game state
+  // create the aliens sprites
+  let numberOfAliens = 8,
+    spacing = 80,
+    xOffset = 50,
+    direction = 1,
+    speed = 2;
+
+  // an array to store all the alein
+  alines = [];
+
+  // make as many aliens 1 line
+  for (let i = 0; i < numberOfAliens; i++) {
+    alien = new Sprite(resources['src/img/sprite-Data.json'].textures['alien.png']);
+    alien.scale.set(0.4, 0.4);
+    let x = spacing * i + xOffset;
+    let y = 60;
+
+    alien.x = x;
+    alien.y = y;
+
+    alien.vx = speed * direction;
+
+    direction *= -1;
+
+    alines.push(alien);
+
+    gameScene.addChild(alien);
+  }
+  // make as many aliens 2 line
+  for (let i = 0; i < numberOfAliens; i++) {
+    alien = new Sprite(resources['src/img/sprite-Data.json'].textures['alien.png']);
+    alien.scale.set(0.4, 0.4);
+    let x = spacing * i + xOffset;
+    let y = 120;
+
+    alien.x = x;
+    alien.y = y;
+
+    alien.vx = speed * direction;
+
+    direction *= -1;
+
+    alines.push(alien);
+
+    gameScene.addChild(alien);
+  }
+
+  // Set the game state
   state = play;
   app.ticker.add(delta => gameLoop(delta));
 }
@@ -147,13 +197,23 @@ function play() {
   ship.y += ship.vy;
   bulet.y += bulet.vy;
 
-  //Contain the ship inside the area of the space
+  // Contain the ship inside the area of the space
   contain(ship, { x: 0, y: 400, width: 700, height: 600 });
   contain(bulet, { y: 0, height: 600 });
   if (bulet.y === 0) {
-    app.stage.removeChild(bulet);
+    gameScene.removeChild(bulet);
   }
-  //contain(ship, stage);
+
+  alines.forEach(function (alien) {
+    alien.x += alien.vx;
+
+    let areaForMuveAlien = contain(alien, { x: 20, width: 680 });
+
+    if (areaForMuveAlien === 'left' || areaForMuveAlien === 'right') {
+      alien.vx *= -1;
+    }
+  })
+
 }
 
 /* Helper functions */
