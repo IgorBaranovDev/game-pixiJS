@@ -37,6 +37,16 @@ function loadProgressHandler(loader, resource) {
 }
 
 let space, ship, state, bulet, alien, menu, healthBar, reloadingGuns;
+let numberOfAliens,
+  spacingBetwinAliens,
+  xOffsetAliens,
+  directionAliens,
+  topPositionAliens,
+  speedAliens;
+
+// an array to store all the alein
+
+const aliens = [];
 
 function setup() {
 
@@ -126,10 +136,8 @@ function setup() {
   reloadingGuns = false;
   short.press = () => {
     if (reloadingGuns === false) {
-      console.log(reloadingGuns);
       gameScene.addChild(bulet);
       reloadingGuns = true;
-      console.log('fire !!!!!!!!');
       bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
       bulet.y = ship.y - bulet.height;
       bulet.vx = 0;
@@ -145,34 +153,36 @@ function setup() {
   };
 
   // create the aliens sprites
-  let numberOfAliens = 8,
-    spacing = 80,
-    xOffset = 50,
-    direction = 1,
-    top = 60,
-    speed = 1;
-
-  // an array to store all the alein
-  alines = [];
+  numberOfAliens = 8,
+    spacingBetwinAliens = 80,
+    xOffsetAliens = 50,
+    directionAliens = 1,
+    topPositionAliens = 60,
+    speedAliens = 2;
 
   // make as many aliens 1 line
   for (let i = 0; i < numberOfAliens; i++) {
 
     alien = new Sprite(resources['src/img/sprite-Data.json'].textures['alien.png']);
     alien.scale.set(0.4, 0.4);
-    let x = spacing * i;
-    let y = top;
+    let x = spacingBetwinAliens * i;
+    let y = topPositionAliens;
 
-    alien.x = x + xOffset;
+    alien.x = x + xOffsetAliens;
     alien.y = y;
 
-    alien.vx = speed * direction;
+    alien.vx = speedAliens * directionAliens;
 
-    direction *= -1;
+    alien.id = i + 100;
 
-    alines.push(alien);
+    directionAliens *= -1;
+
+    aliens.push(alien);
 
     gameScene.addChild(alien);
+    // console.log(alien);
+
+    console.log(aliens);
   }
   // make as many aliens 2 line
   // for (let i = 0; i < numberOfAliens; i++) {
@@ -243,32 +253,30 @@ function play() {
 
   // Contain the ship inside the area of the space
   contain(ship, { x: 0, y: 400, width: 700, height: 600 });
+
+  // if you hit the enemy  
   contain(bulet, { y: 40, height: 600 });
   if (bulet.y === 40) {
     gameScene.removeChild(bulet);
     reloadingGuns = false;
-
+  } else {
+    for (let i = 0; i < aliens.length; i++) {
+      if (hitTestRectangle(bulet, aliens[i])) {
+        gameScene.removeChild(bulet);
+        gameScene.removeChild(aliens[i]);
+        console.log('hit!!!!!!!!!!' + aliens[i].id);
+      }
+    }
   }
 
-  alines.forEach(function (alien) {
+  // Area for liens
+  aliens.forEach(function (alien) {
     alien.x += alien.vx;
-
     let areaForMuveAlien = contain(alien, { x: 10, width: 690 });
-
     if (areaForMuveAlien === 'left' || areaForMuveAlien === "right") {
       alien.vx *= -1;
     }
-
-    if (hitTestRectangle(bulet, alien)) {
-      gameScene.removeChild(this.alien);
-      gameScene.removeChild(bulet);
-    }
   })
-
-  // if you hit the enemy
-
-
-
 }
 
 /* Helper functions */
