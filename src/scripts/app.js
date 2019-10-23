@@ -36,7 +36,7 @@ function loadProgressHandler(loader, resource) {
   console.log(`progress: ${Math.round(loader.progress)}%`);
 }
 
-let space, ship, state, bulet, alien, menu, healthBar;
+let space, ship, state, bulet, alien, menu, healthBar, reloadingGuns;
 
 function setup() {
 
@@ -122,17 +122,25 @@ function setup() {
     resources['src/img/sprite-Data.json'].textures['bulet.png']
   );
 
+  bulet.scale.set(0.6, 0.6);
+  reloadingGuns = false;
   short.press = () => {
-    gameScene.addChild(bulet);
-    console.log('short');
-    bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
-    bulet.y = ship.y - bulet.height;
-    bulet.vx = 0;
-    bulet.vy = -20;
+    if (reloadingGuns === false) {
+      console.log(reloadingGuns);
+      gameScene.addChild(bulet);
+      reloadingGuns = true;
+      console.log('fire !!!!!!!!');
+      bulet.x = ship.x + ship.width / 2 - bulet.width / 2;
+      bulet.y = ship.y - bulet.height;
+      bulet.vx = 0;
+      bulet.vy = -10;
+    } else {
+      console.log('reload');
+    }
   };
   short.release = () => {
     if (!up.isDown && bulet.vx === 0) {
-      fier = true;
+      reloadingGuns = true;
     }
   };
 
@@ -141,19 +149,21 @@ function setup() {
     spacing = 80,
     xOffset = 50,
     direction = 1,
-    speed = 2;
+    top = 60,
+    speed = 1;
 
   // an array to store all the alein
   alines = [];
 
   // make as many aliens 1 line
   for (let i = 0; i < numberOfAliens; i++) {
+
     alien = new Sprite(resources['src/img/sprite-Data.json'].textures['alien.png']);
     alien.scale.set(0.4, 0.4);
-    let x = spacing * i + xOffset;
-    let y = 60;
+    let x = spacing * i;
+    let y = top;
 
-    alien.x = x;
+    alien.x = x + xOffset;
     alien.y = y;
 
     alien.vx = speed * direction;
@@ -165,23 +175,23 @@ function setup() {
     gameScene.addChild(alien);
   }
   // make as many aliens 2 line
-  for (let i = 0; i < numberOfAliens; i++) {
-    alien = new Sprite(resources['src/img/sprite-Data.json'].textures['alien.png']);
-    alien.scale.set(0.4, 0.4);
-    let x = spacing * i + xOffset;
-    let y = 120;
+  // for (let i = 0; i < numberOfAliens; i++) {
+  //   alien = new Sprite(resources['src/img/sprite-Data.json'].textures['alien.png']);
+  //   alien.scale.set(0.4, 0.4);
+  //   let x = spacing * i + xOffset;
+  //   let y = 120;
 
-    alien.x = x;
-    alien.y = y;
+  //   alien.x = x;
+  //   alien.y = y;
 
-    alien.vx = speed * direction;
+  //   alien.vx = speed * direction;
 
-    direction *= -1;
+  //   direction *= -1;
 
-    alines.push(alien);
+  //   alines.push(alien);
 
-    gameScene.addChild(alien);
-  }
+  //   gameScene.addChild(alien);
+  // }
 
   // Create info game
   menu = new Container();
@@ -214,6 +224,7 @@ function setup() {
   outerBar.endFill();
   healthBar.addChild(outerBar);
 
+  healthBar.outer = outerBar;
 
   // Set the game state
   state = play;
@@ -232,20 +243,31 @@ function play() {
 
   // Contain the ship inside the area of the space
   contain(ship, { x: 0, y: 400, width: 700, height: 600 });
-  contain(bulet, { y: 0, height: 600 });
-  if (bulet.y === 0) {
+  contain(bulet, { y: 40, height: 600 });
+  if (bulet.y === 40) {
     gameScene.removeChild(bulet);
+    reloadingGuns = false;
+
   }
 
   alines.forEach(function (alien) {
     alien.x += alien.vx;
 
-    let areaForMuveAlien = contain(alien, { x: 20, width: 680 });
+    let areaForMuveAlien = contain(alien, { x: 10, width: 690 });
 
-    if (areaForMuveAlien === 'left' || areaForMuveAlien === 'right') {
+    if (areaForMuveAlien === 'left' || areaForMuveAlien === "right") {
       alien.vx *= -1;
     }
+
+    if (hitTestRectangle(bulet, alien)) {
+      gameScene.removeChild(this.alien);
+      gameScene.removeChild(bulet);
+    }
   })
+
+  // if you hit the enemy
+
+
 
 }
 
@@ -283,40 +305,101 @@ function contain(sprite, container) {
 }
 
 // The 'keyboard' helper function
-function keyboard(keyCode) {
+
+function keyboard(value) {
   let key = {};
-  key.code = keyCode;
+  key.value = value;
   key.isDown = false;
   key.isUp = true;
   key.press = undefined;
   key.release = undefined;
-
   //The `downHandler`
   key.downHandler = event => {
-    if (event.keyCode === key.code) {
+    if (event.keyCode === key.value) {
       if (key.isUp && key.press) key.press();
       key.isDown = true;
       key.isUp = false;
+      event.preventDefault();
     }
-    event.preventDefault();
   };
 
   //The `upHandler`
   key.upHandler = event => {
-    if (event.keyCode === key.code) {
+    if (event.keyCode === key.value) {
       if (key.isDown && key.release) key.release();
       key.isDown = false;
       key.isUp = true;
+      event.preventDefault();
     }
-    event.preventDefault();
   };
 
   //Attach event listeners
+  const downListener = key.downHandler.bind(key);
+  const upListener = key.upHandler.bind(key);
+
   window.addEventListener(
-    "keydown", key.downHandler.bind(key), false
+    "keydown", downListener, false
   );
   window.addEventListener(
-    "keyup", key.upHandler.bind(key), false
+    "keyup", upListener, false
   );
+
+  // Detach event listeners
+  key.unsubscribe = () => {
+    window.removeEventListener("keydown", downListener);
+    window.removeEventListener("keyup", upListener);
+  };
+
   return key;
+}
+
+function hitTestRectangle(r1, r2) {
+
+  //Define the variables we'll need to calculate
+  let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+  //hit will determine whether there's a collision
+  hit = false;
+
+  //Find the center points of each sprite
+  r1.centerX = r1.x + r1.width / 2;
+  r1.centerY = r1.y + r1.height / 2;
+  r2.centerX = r2.x + r2.width / 2;
+  r2.centerY = r2.y + r2.height / 2;
+
+  //Find the half-widths and half-heights of each sprite
+  r1.halfWidth = r1.width / 2;
+  r1.halfHeight = r1.height / 2;
+  r2.halfWidth = r2.width / 2;
+  r2.halfHeight = r2.height / 2;
+
+  //Calculate the distance vector between the sprites
+  vx = r1.centerX - r2.centerX;
+  vy = r1.centerY - r2.centerY;
+
+  //Figure out the combined half-widths and half-heights
+  combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+  combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+
+  //Check for a collision on the x axis
+  if (Math.abs(vx) < combinedHalfWidths) {
+
+    //A collision might be occuring. Check for a collision on the y axis
+    if (Math.abs(vy) < combinedHalfHeights) {
+
+      //There's definitely a collision happening
+      hit = true;
+    } else {
+
+      //There's no collision on the y axis
+      hit = false;
+    }
+  } else {
+
+    //There's no collision on the x axis
+    hit = false;
+  }
+
+  //`hit` will be either `true` or `false`
+  return hit;
 }
