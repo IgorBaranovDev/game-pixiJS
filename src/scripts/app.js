@@ -5,7 +5,9 @@ let Application = PIXI.Application,
   resources = PIXI.loader.resources,
   Graphics = PIXI.Graphics,
   Sprite = PIXI.Sprite,
-  TextureCache = PIXI.utils.TextureCache;
+  TextureCache = PIXI.utils.TextureCache,
+  Text = PIXI.Text,
+  TextStyle = PIXI.TextStyle;
 
 // Create a Pixi Application
 let app = new Application({
@@ -17,7 +19,7 @@ let app = new Application({
 }
 );
 
-//Add the canvas that Pixi automatically created for you to the HTML document
+// Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
 
 // To change the background color
@@ -36,7 +38,7 @@ function loadProgressHandler(loader, resource) {
   console.log(`progress: ${Math.round(loader.progress)}%`);
 }
 
-let space, ship, state, bulet, alien, menu, healthBar, reloadingGuns;
+let space, ship, state, bulet, alien, menu, healthBar, reloadingGuns, nameGame, startGame;
 let numberOfAliens,
   spacingBetwinAliens,
   xOffsetAliens,
@@ -49,10 +51,40 @@ let numberOfAliens,
 const aliens = [];
 
 function setup() {
+  // Create 'Start Game' scene
+  startGameScene = new Container();
+  app.stage.addChild(startGameScene);
 
-  //Make the game scene and add it to the stage
+  // Create the text spprite and add it to the 'startGame' scene
+  let style = new TextStyle({
+    fontFamily: 'Futura',
+    fontSize: 64,
+    fill: 'white'
+  });
+
+  let styleStart = new TextStyle({
+    fontFamily: 'Futura',
+    fontSize: 18,    
+    fontWeight: 'bold',
+    fill:'#F50' 
+  });
+  console.log(styleStart);
+  nameGame = new Text('DefendeR', style);
+  nameGame.x = app.view.width / 2 - nameGame.width / 2;
+  nameGame.y = app.view.height / 2 - nameGame.height;
+  startGameScene.addChild(nameGame);
+
+  startGame = new Text('Press Enter', styleStart);
+  startGame.x = app.view.width / 2 - startGame.width / 2;
+  startGame.y = app.view.height / 2 + nameGame.height / 2;
+  startGameScene.addChild(startGame);
+
+  // Make the game scene and add it to the stage
   gameScene = new Container();
   app.stage.addChild(gameScene);
+
+  // Make the `gameScene' invisible 
+    gameScene.visible = false;
 
   // create the space 
   const spaceTexture = TextureCache['Space.png'];
@@ -247,6 +279,20 @@ function gameLoop(delta) {
 }
 
 function play() {
+  // start new game
+  const start = keyboard(13);
+  if (gameScene.visible === false) {
+    start.press = () => {
+      startGame.visible = false;
+      gameScene.visible = true;
+    }
+  } 
+  // else if () {
+  //   gameScene.visible = false;
+  //   gameOver.visible = true;
+  // } 
+
+
   ship.x += ship.vx;
   ship.y += ship.vy;
   bulet.y += bulet.vy;
